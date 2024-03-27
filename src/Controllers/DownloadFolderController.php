@@ -14,7 +14,7 @@ class DownloadFolderController extends ContentController
 {
     private static $url_segment = 'download-folder';
 
-    public static function get_download_link($folder)
+    public static function get_download_link($folder):?string
     {
         return Director::absoluteURL(
             Controller::join_links(
