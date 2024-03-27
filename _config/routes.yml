@@ -1,1 +1,3 @@
-# see https://docs.silverstripe.org/en/developer_guides/configuration/configuration/
+SilverStripe\Control\Director:
+  rules:
+    'download-folder//$Action/$ID/$OtherID': 'Sunnysideup\DownloadFolder\Controllers\DownloadFolderController'

@@ -1,1 +1,8 @@
 # see https://docs.silverstripe.org/en/developer_guides/configuration/configuration/
+SilverStripe\Assets\Folder:
+  extensions:
+    - Sunnysideup\DownloadFolder\Extensions\DownloadFolderExtension
+
+SilverStripe\AssetAdmin\Forms\AssetFormFactory:
+  extensions:
+    - Sunnysideup\DownloadFolder\Extensions\DownloadFolderFileFormFactoryExtension
