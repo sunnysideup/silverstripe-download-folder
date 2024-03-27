@@ -6,6 +6,7 @@ use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Config;
 use ZipArchive;
 
@@ -44,6 +45,12 @@ class DownloadFolderController extends ContentController
                             return $this->httpError(403);
                         }
                         $path = Controller::join_links(ASSETS_PATH, $file->getFilename());
+                        if(! file_exists($path)) {
+                            $path = Controller::join_links(PUBLIC_PATH, $file->getSourceURL(true));
+                            if(! file_exists($path)) {
+                                $path = str_replace('public/assets/', 'public/assets/.protected/', $path);
+                            }
+                        }
                         $zip->addFile($path, $file->Name);
                     }
                     $zip->close();
