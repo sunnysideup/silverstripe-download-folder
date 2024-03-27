@@ -11,7 +11,7 @@ class DownloadFolderExtension extends DataExtension
         'AllowFullFolderDownload' => 'Boolean',
     ];
 
-    public function AllowFullFolderDownloadLink()
+    public function AllowFullFolderDownloadLink() : ?string
     {
         return DownloadFolderController::get_download_link($this->getOwner());
     }
