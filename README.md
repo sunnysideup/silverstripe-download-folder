@@ -1,18 +1,18 @@
 # Download Folder
 
-[![Build Status](https://travis-ci.org/sunnysideup/silverstripe-pricespy.svg?branch=master)](https://travis-ci.org/sunnysideup/silverstripe-pricespy)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-pricespy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-pricespy/?branch=master)
-[![codecov.io](https://codecov.io/github/sunnysideup/silverstripe-pricespy/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/silverstripe-pricespy?branch=master)
+[![Build Status](https://travis-ci.org/sunnysideup/download-folder.svg?branch=master)](https://travis-ci.org/sunnysideup/download-folder)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/download-folder/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/download-folder/?branch=master)
+[![codecov.io](https://codecov.io/github/sunnysideup/download-folder/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/download-folder?branch=master)
 
-[![Latest Stable Version](https://poser.pugx.org/jq/version)](https://packagist.org/packages/jq)
-[![License](https://poser.pugx.org/jq/license)](https://packagist.org/packages/jq)
-[![Monthly Downloads](https://poser.pugx.org/jq/d/monthly)](https://packagist.org/packages/jq)
+[![Latest Stable Version](https://poser.pugx.org/sunnysideup/download-folder/version)](https://packagist.org/packages/sunnysideup/download-folder)
+[![License](https://poser.pugx.org/sunnysideup/download-folder/license)](https://packagist.org/packages/sunnysideup/download-folder)
+[![Monthly Downloads](https://poser.pugx.org/sunnysideup/download-folder/d/monthly)](https://packagist.org/packages/sunnysideup/download-folder)
 
 ## Documentation
 
 -   [Developer Docs](docs/en/INDEX.md)
 -   [User Guide](docs/en/userguide.md)
--   [API Docs](http://docs.ssmods.com/jq/classes.xhtml)
+-   [API Docs](http://docs.ssmods.com/sunnysideup/download-folder/classes.xhtml)
 
 ## Requirements
 
@@ -25,7 +25,7 @@ See [composer.json](composer.json) for details.
 ## Installation
 
 ```shell
-composer require jq
+composer require sunnysideup/download-folder
 ```
 
 ### Configuration
