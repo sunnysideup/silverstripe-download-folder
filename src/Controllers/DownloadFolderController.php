@@ -16,11 +16,13 @@ class DownloadFolderController extends ContentController
 
     public static function get_download_link($folder)
     {
-        return Controller::join_links(
-            Config::inst()->get(self::class, 'url_segment'),
-            'download',
-            urlencode($folder->Name),
-            $folder->ID
+        return Director::absoluteURL(
+            Controller::join_links(
+                Config::inst()->get(self::class, 'url_segment'),
+                'download',
+                urlencode($folder->Name),
+                $folder->ID
+            )
         );
     }
 
