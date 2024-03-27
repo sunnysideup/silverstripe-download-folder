@@ -2,14 +2,11 @@
 
 namespace Sunnysideup\DownloadFolder\Controllers;
 
-use SilverStripe\Forms\FieldList;
-use DNADesign\Elemental\TopPage\DataExtension;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Forms\CheckboxField;
 use ZipArchive;
 
 class DownloadFolderController extends ContentController
@@ -27,13 +24,13 @@ class DownloadFolderController extends ContentController
     }
 
     private static $allowed_actions = [
-        'download'
+        'download',
     ];
 
     public function download($request)
     {
         $id = (int) $request->param('OtherID');
-        if ($id) {
+        if ($id !== 0) {
             $folder = Folder::get()->byID($id);
             if ($folder && $folder->AllowFullFolderDownload && $folder->canView()) {
                 $files = File::get()
@@ -43,7 +40,7 @@ class DownloadFolderController extends ContentController
                 $zip = new ZipArchive();
                 if ($zip->open($zipFilePath, ZipArchive::CREATE) === true) {
                     foreach ($files as $file) {
-                        if (!$file->canView()) {
+                        if (! $file->canView()) {
                             return $this->httpError(403);
                         }
                         $path = Controller::join_links(ASSETS_PATH, $file->getFilename());
@@ -52,7 +49,7 @@ class DownloadFolderController extends ContentController
                     $zip->close();
                     // Set headers to force download
                     return $this->getResponse()
-                        ->addHeader('Content-Disposition', 'attachment; filename="'.urlencode($folder->Name).'.zip"')
+                        ->addHeader('Content-Disposition', 'attachment; filename="' . urlencode($folder->Name) . '.zip"')
                         ->addHeader('Content-Type', 'application/zip')
                         ->addHeader('Content-Length', filesize($zipFilePath))
                         ->setBody(file_get_contents($zipFilePath))
@@ -67,5 +64,4 @@ class DownloadFolderController extends ContentController
             return $this->httpError(404);
         }
     }
-
 }
