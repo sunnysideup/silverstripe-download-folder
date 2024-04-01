@@ -3,6 +3,7 @@
 namespace Sunnysideup\DownloadFolder\Extensions;
 
 use SilverStripe\Assets\Folder;
+use SilverStripe\Assets\File;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
@@ -11,7 +12,6 @@ class DownloadFolderFileFormFactoryExtension extends Extension
 {
     /**
      * Update Fields
-     * @return FieldList
      */
     public function updateForm($form, $controller, $name, $context)
     {

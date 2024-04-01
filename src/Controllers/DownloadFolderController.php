@@ -4,13 +4,12 @@ namespace Sunnysideup\DownloadFolder\Controllers;
 
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
-use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataList;
+use Sunnysideup\Download\Api\CreateProtectedDownloadAsset;
+use Sunnysideup\Download\Api\FilePathCalculator;
 use Sunnysideup\Download\Control\DownloadFile;
-use Sunnysideup\Download\Control\Model\CachedDownload;
 use ZipArchive;
 
 class DownloadFolderController extends DownloadFile
@@ -27,8 +26,8 @@ class DownloadFolderController extends DownloadFile
             Controller::join_links(
                 Config::inst()->get(self::class, 'url_segment'),
                 'download',
+                $folder->ID,
                 urlencode($folder->Name),
-                $folder->ID
             )
         );
     }
@@ -45,26 +44,25 @@ class DownloadFolderController extends DownloadFile
     protected $folder = null;
     protected $filesToCollate = [];
 
-    protected $hashableString = '';
+    protected $hashableStringArray = [];
 
-    public function index()
+    public function download()
     {
-        $id = (int) $this->getRequest()->param('OtherID');
+        if(!empty($this->filesToCollate)) {
+            return parent::index();
+        }
+        return $this->httpError(404, 'No files to download');
+    }
+
+    protected function init()
+    {
+        parent::init();
+        $id = (int) $this->getRequest()->param('ID');
         if ($id !== 0) {
             $this->folder = Folder::get()->byID($id);
             if ($this->folder) {
                 if($this->folder->AllowFullFolderDownload && $this->folder->canView()) {
-                    $files = File::get()
-                        ->filter('ParentID', $this->folder->ID)
-                        ->exclude(['ClassName' => Folder::class]);
-                    $this->setFilesToCollate($files);
-                    return CachedDownload::inst(
-                        $this->getFilename(),
-                        $this->getTitle(),
-                        $this->getMaxAgeInMinutes(),
-                        $this->getDeleteOnFlush(),
-                    )
-                        ->getData($this->getCallbackToCreateDownloadFile());
+                    $this->setFilesToCollate();
                 } else {
                     return $this->httpError(403, 'You do not have permission to download this folder.');
                 }
@@ -72,12 +70,19 @@ class DownloadFolderController extends DownloadFile
                 return $this->httpError(404, 'Folder '.$this->getRequest()->param('ID').' can not be found');
             }
         } else {
-            return $this->httpError(404);
+            return $this->httpError(404, 'No folder ID provided');
         }
     }
 
-    protected function setFilesToCollate(DataList $files)
+    protected function setFilesToCollate()
     {
+        $files = File::get()
+        ->filter(
+            [
+                'ParentID' => $this->folder->ID,
+                'ClassName:not' => Folder::class
+            ]
+        );
         $skippedExtensions = (array) $this->Config()->get('skipped_extensions');
         foreach ($files as $file) {
             if (! $file->canView()) {
@@ -86,18 +91,12 @@ class DownloadFolderController extends DownloadFile
             if(in_array($file->getExtension(), $skippedExtensions, true)) {
                 continue;
             }
-            $path = Controller::join_links(ASSETS_PATH, $file->getFilename());
-            if(! file_exists($path)) {
-                $path = Controller::join_links(PUBLIC_PATH, $file->getSourceURL(true));
-                if(! file_exists($path)) {
-                    $path = str_replace('public/assets/', 'public/assets/.protected/', $path);
-                }
-            }
+            $path = FilePathCalculator::get_path($file);
             if(file_exists($path)) {
                 if(! $file->Hash) {
                     user_error('No hash for file!'.$path);
                 }
-                $this->hashableStringArray[$path] = $file->Hash.'_'.strtotime($file->LastEdited);
+                $this->hashableStringArray[$path] = $file->Hash.'_'.filesize($path).'_'.filemtime($path);
                 $this->filesToCollate[$path] = $file;
             } else {
                 user_error('Could not find file with ID '.$file->ID);
@@ -110,34 +109,34 @@ class DownloadFolderController extends DownloadFile
         return md5(implode('_', $this->hashableStringArray));
     }
 
-    protected function getCallbackToCreateDownloadFile()
+    protected function getCallbackToCreateDownloadFile(): callable
     {
         return function () {
             $zipFilePath = tempnam(sys_get_temp_dir(), 'folder') . '.zip';
             $zip = new ZipArchive();
-            if ($zip->open($zipFilePath, ZipArchive::CREATE) === true) {
+            $openZip = $zip->open($zipFilePath, ZipArchive::CREATE);
+            if ($openZip === true) {
                 foreach($this->filesToCollate as $path => $file) {
                     $zip->addFile($path, $file->Name);
                 }
                 $zip->close();
-
+                CreateProtectedDownloadAsset::register_download_asset_from_local_path($zipFilePath, $this->getFileName());
+                return file_get_contents($zipFilePath);
             } else {
                 return user_error('could not create zip file!');
             }
-
         };
     }
 
     protected function getMaxAgeInMinutes(): ?int
     {
-        return 99999999999999999; // set to null to use default
+        return 365 * 24 * 60; // set to one year as it changes automatically if the hash of files changes.
     }
 
     protected function getDeleteOnFlush(): ?bool
     {
         return false; // set to null to use default
     }
-
 
     protected function getContentType(): string
     {
@@ -146,12 +145,18 @@ class DownloadFolderController extends DownloadFile
 
     protected function getFileName(): string
     {
-        return urlencode($this->folder->name);
+        return urlencode((string) $this->folder->Name). '_'.$this->calculateHashFromFiles().'.zip';
     }
 
     protected function getTitle(): string
     {
         return 'Download of folder '.$this->folder;
     }
+
+    protected function getHasControlledAccess(): ?bool
+    {
+        return true; // set to null to use default
+    }
+
 
 }

@@ -1,3 +1,7 @@
+---
+Name: download-folder-routes
+After: '#assetsflysystem'
+---
 SilverStripe\Control\Director:
   rules:
     'download-folder//$Action/$ID/$OtherID': 'Sunnysideup\DownloadFolder\Controllers\DownloadFolderController'

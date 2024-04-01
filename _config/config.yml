@@ -1,3 +1,7 @@
+---
+Name: download-folder
+After: '#assetsflysystem'
+---
 # see https://docs.silverstripe.org/en/developer_guides/configuration/configuration/
 SilverStripe\Assets\Folder:
   extensions:
