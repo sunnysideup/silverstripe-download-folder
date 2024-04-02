@@ -76,30 +76,33 @@ class DownloadFolderController extends DownloadFile
 
     protected function setFilesToCollate()
     {
-        $files = File::get()
-        ->filter(
-            [
-                'ParentID' => $this->folder->ID,
-                'ClassName:not' => Folder::class
-            ]
-        );
-        $skippedExtensions = (array) $this->Config()->get('skipped_extensions');
-        foreach ($files as $file) {
-            if (! $file->canView()) {
-                continue;
-            }
-            if(in_array($file->getExtension(), $skippedExtensions, true)) {
-                continue;
-            }
-            $path = FilePathCalculator::get_path($file);
-            if(file_exists($path)) {
-                if(! $file->Hash) {
-                    user_error('No hash for file!'.$path);
+        if(empty($this->hashableStringArray)) {
+            $this->hashableStringArray[] = 'collated';
+            $files = File::get()
+                ->filter(
+                    [
+                        'ParentID' => $this->folder->ID,
+                        'ClassName:not' => Folder::class
+                    ]
+                );
+            $skippedExtensions = (array) $this->Config()->get('skipped_extensions');
+            foreach ($files as $file) {
+                if (! $file->canView()) {
+                    continue;
                 }
-                $this->hashableStringArray[$path] = $file->Hash.'_'.filesize($path).'_'.filemtime($path);
-                $this->filesToCollate[$path] = $file;
-            } else {
-                user_error('Could not find file with ID '.$file->ID);
+                if(in_array($file->getExtension(), $skippedExtensions, true)) {
+                    continue;
+                }
+                $path = FilePathCalculator::get_path($file);
+                if(file_exists($path)) {
+                    if(! $file->Hash) {
+                        user_error('No hash for file!'.$path);
+                    }
+                    $this->hashableStringArray[$path] = $file->Hash.'_'.filesize($path).'_'.filemtime($path);
+                    $this->filesToCollate[$path] = $file;
+                } else {
+                    user_error('Could not find file with ID '.$file->ID);
+                }
             }
         }
     }
@@ -120,8 +123,12 @@ class DownloadFolderController extends DownloadFile
                     $zip->addFile($path, $file->Name);
                 }
                 $zip->close();
-                CreateProtectedDownloadAsset::register_download_asset_from_local_path($zipFilePath, $this->getFileName());
-                return file_get_contents($zipFilePath);
+                $file = CreateProtectedDownloadAsset::register_download_asset_from_local_path($zipFilePath, $this->getFileName());
+                if($file && $file->exists()) {
+                    return file_get_contents(FilePathCalculator::get_path($file));
+                } elseif(file_exists($zipFilePath)) {
+                    return file_get_contents($zipFilePath);
+                }
             } else {
                 return user_error('could not create zip file!');
             }
@@ -150,7 +157,7 @@ class DownloadFolderController extends DownloadFile
 
     protected function getTitle(): string
     {
-        return 'Download of folder '.$this->folder;
+        return 'Download of folder '.$this->folder->Name;
     }
 
     protected function getHasControlledAccess(): ?bool
