@@ -2,7 +2,7 @@
 
 namespace Sunnysideup\DownloadFolder\Extensions;
 
-use DNADesign\Elemental\TopPage\DataExtension;
+use SilverStripe\ORM\DataExtension;
 use Sunnysideup\DownloadFolder\Controllers\DownloadFolderController;
 
 class DownloadFolderExtension extends DataExtension
@@ -11,7 +11,7 @@ class DownloadFolderExtension extends DataExtension
         'AllowFullFolderDownload' => 'Boolean',
     ];
 
-    public function AllowFullFolderDownloadLink() : ?string
+    public function AllowFullFolderDownloadLink(): ?string
     {
         return DownloadFolderController::get_download_link($this->getOwner());
     }
