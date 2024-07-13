@@ -1,0 +1,51 @@
+<?php
+
+namespace Sunnysideup\App;
+
+use SilverStripe\Assets\File;
+use SilverStripe\Assets\Folder;
+use SilverStripe\Assets\Image;
+use SilverStripe\Dev\BuildTask;
+use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\DB;
+use SilverStripe\Security\InheritedPermissions;
+use SilverStripe\Security\Permission;
+use SilverStripe\Versioned\Versioned;
+
+class TestTask extends BuildTask
+{
+    protected $title = 'Test Task';
+    protected $description = 'This task is for testing purposes only.';
+
+    private static $segment = 'test-task';
+    public function run($request)
+    {
+        $fromPath = '/tmp/files.zip';
+        DB::alteration_message($fromPath);
+        $this->createWorkExample($fromPath, 'zip.zip');
+    }
+    public function createWorkExample(string $fromPath, string $fileNameToSave): File
+    {
+        $folder = Folder::find_or_make('WorkExamples');
+        self::protect_file_or_folder_and_write($folder);
+        $filter = ['Name' => $fileNameToSave, 'ParentID' => $folder->ID];
+        $file = File::get()->filter($filter)->first();
+        if(!$file) {
+            $file = File::create($filter);
+            $file->setFromLocalFile($fromPath, $file->generateFilename());
+            $file->writeToStage(Versioned::DRAFT);
+            $file->publishRecursive();
+        }
+        self::protect_file_or_folder_and_write($file);
+        return $file;
+    }
+    protected static function protect_file_or_folder_and_write($fileOrFolder)
+    {
+        $fileOrFolder->CanViewType = InheritedPermissions::ONLY_THESE_USERS;
+        $fileOrFolder->ShowInSearch = false;
+        $fileOrFolder->ViewerGroups()->add(Permission::get_groups_by_permission('ADMIN')->first());
+        $fileOrFolder->writeToStage(Versioned::DRAFT);
+        $fileOrFolder->publishRecursive();
+        return $fileOrFolder;
+    }
+}
