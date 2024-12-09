@@ -12,6 +12,10 @@ use Sunnysideup\Download\Api\FilePathCalculator;
 use Sunnysideup\Download\Control\DownloadFile;
 use ZipArchive;
 
+/**
+ * Class \Sunnysideup\DownloadFolder\Controllers\DownloadFolderController
+ *
+ */
 class DownloadFolderController extends DownloadFile
 {
     private static $url_segment = 'download-folder';

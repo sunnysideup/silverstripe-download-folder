@@ -8,6 +8,11 @@ use SilverStripe\Core\Extension;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 
+/**
+ * Class \Sunnysideup\DownloadFolder\Extensions\DownloadFolderFileFormFactoryExtension
+ *
+ * @property AssetFormFactory|DownloadFolderFileFormFactoryExtension $owner
+ */
 class DownloadFolderFileFormFactoryExtension extends Extension
 {
     /**
