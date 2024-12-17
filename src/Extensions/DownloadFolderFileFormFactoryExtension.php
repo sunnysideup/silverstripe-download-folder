@@ -29,9 +29,12 @@ class DownloadFolderFileFormFactoryExtension extends Extension
                 if ($record->AllowFullFolderDownload) {
                     $desc .= ' Try download now: <a href="' . $record->AllowFullFolderDownloadLink() . '">' . $record->AllowFullFolderDownloadLink() . '</a>';
                 }
-                $fields->push(
-                    (CheckboxField::create('AllowFullFolderDownload', 'Allow Full Folder Download'))
-                        ->setDescription($desc)
+                $fields->addFieldsToTab(
+                    'Editor.Downloads',
+                    [
+                        (CheckboxField::create('AllowFullFolderDownload', 'Allow Full Folder Download'))
+                            ->setDescription($desc)
+                    ]
                 );
             }
         }

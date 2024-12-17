@@ -2,7 +2,7 @@
 
 namespace Sunnysideup\DownloadFolder\Extensions;
 
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use Sunnysideup\DownloadFolder\Controllers\DownloadFolderController;
 
 /**
@@ -11,7 +11,7 @@ use Sunnysideup\DownloadFolder\Controllers\DownloadFolderController;
  * @property Folder|DownloadFolderExtension $owner
  * @property bool $AllowFullFolderDownload
  */
-class DownloadFolderExtension extends DataExtension
+class DownloadFolderExtension extends Extension
 {
     private static $db = [
         'AllowFullFolderDownload' => 'Boolean',
